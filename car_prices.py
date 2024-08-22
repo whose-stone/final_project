@@ -21,7 +21,7 @@ from sklearn.inspection import permutation_importance
 df = pd.read_csv('carAd.csv')
 
 #review the features of the dataset
-df.info()
+#df.info()
 
 #reset the index
 df.reset_index(drop=True, inplace=True)
@@ -35,7 +35,7 @@ carAd = df[['Genmodel','Color','Bodytype','Fuel_type','Seat_num','Door_num','Pri
 #Start cleaning the data
 
 #see what the car model names are
-print(carAd["Genmodel"].value_counts(dropna = False)) 
+#print(carAd["Genmodel"].value_counts(dropna = False)) 
 
 name_list = [name for name in carAd['Genmodel']]
 
@@ -51,8 +51,20 @@ models = ['L200', 'Q3', 'CX-5', 'XC90']
 
 #select our models from the Genmodel column
 carAd_models = carAd[carAd['Genmodel'].isin(models)]
-print(len(carAd_models))
 
+#select the top 6 colors sold
+carAd_colors = carAd["Color"].value_counts().index.tolist()[:6]
+#print(carAd_colors)
+
+
+print(carAd['Bodytype'].is_unique)
+
+# Using the data adapted from Huang et al. (2021), considering the vehicle models L200, 
+# Q3, CX-5, and XC90, the sport utility vehicle and pickup body types, using either petrol 
+# or diesel fuel types, and the six most frequently advertised colors of these vehicles: what 
+# are the most influential attributes when predicting the vehicles' advertised price?
+
+#Genmodel, Color, Bodytype, Fuel_type, Seat_num, Door_num, Price
 
 
 #initial data analysis of each feature
