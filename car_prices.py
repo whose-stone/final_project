@@ -27,10 +27,33 @@ df.info()
 df.reset_index(drop=True, inplace=True)
 
 #select those features that lend themselves to rendom forest analysis
-#goal is to use model, body type, fuel type, top six used colors. Adding the number of seats, number of doors, and miles
+#goal is to use model, body type, fuel type, top six used colors, the number of seats, the number of doors.
 
-my_df = df[['Genmodel','Color','Bodytype','Fuel_type','Seat_num','Door_num','Price']]
-#print(my_df)
+carAd = df[['Genmodel','Color','Bodytype','Fuel_type','Seat_num','Door_num','Price']]
+#print(carAd)
+
+#Start cleaning the data
+
+#see what the car model names are
+print(carAd["Genmodel"].value_counts(dropna = False)) 
+
+name_list = [name for name in carAd['Genmodel']]
+
+#list to select specific models
+models = ['L200', 'Q3', 'CX-5', 'XC90']
+
+#are they in our list
+#for model in models:
+#    if model in name_list:
+#        print(f"{model} is in the list.")
+#    else:
+#        print(f"{model} is not in the list")
+
+#select our models from the Genmodel column
+carAd_models = carAd[carAd['Genmodel'].isin(models)]
+print(len(carAd_models))
+
+
 
 #initial data analysis of each feature
 #for columns in df.columns: 
@@ -39,13 +62,6 @@ my_df = df[['Genmodel','Color','Bodytype','Fuel_type','Seat_num','Door_num','Pri
 #                , bins= 10)
 #   plt.title(columns)
 #   plt.show()
-
-#remove null values
-
-#see what features have null values
-print(my_df.isnull().sum())
-
-#select the models needed: L200, Q3, CX-5, XC90
 
 
 
