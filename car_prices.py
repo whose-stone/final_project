@@ -27,50 +27,51 @@ df = pd.read_csv('carAd.csv')
 df.reset_index(drop=True, inplace=True)
 
 #select those features that lend themselves to rendom forest analysis
-#goal is to use model, body type, fuel type, top six used colors, the number of seats, the number of doors.
 
+#goal is to use model, body type, fuel type, top six used colors, the number of seats, the number of doors.
 carAd = df[['Genmodel','Color','Bodytype','Fuel_type','Seat_num','Door_num','Price']]
+
 #print(carAd)
 
 #Start cleaning the data
 
-#see what the car model names are
 #print(carAd["Genmodel"].value_counts(dropna = False)) 
-
-name_list = [name for name in carAd['Genmodel']]
 
 #list to select specific models
 models = ['L200', 'Q3', 'CX-5', 'XC90']
 
-#are they in our list
-#for model in models:
-#    if model in name_list:
-#        print(f"{model} is in the list.")
-#    else:
-#        print(f"{model} is not in the list")
-
 #select our models from the Genmodel column
-carAd_models = carAd[carAd['Genmodel'].isin(models)]
-
+carAd = carAd.loc[carAd['Genmodel'].isin(models)]
+ 
 #select the top 6 colors sold
-carAd_colors = carAd["Color"].value_counts().index.tolist()[:6]
-#print(carAd_colors)
+carColors = carAd["Color"].value_counts().index.tolist()[:6]
+carAd = carAd.loc[carAd['Color'].isin(carColors)]
 
+#Just Diesel and Petrol
+carAd = carAd[(carAd['Fuel_type'] == 'Petrol') | (carAd['Fuel_type'] == 'Diesel')]
 
-print(carAd['Bodytype'].is_unique)
+#Just SUV and Pickup
+carAd = carAd[(carAd['Bodytype'] == 'SUV') | (carAd['Bodytype'] == 'Pickup')]
 
-# Using the data adapted from Huang et al. (2021), considering the vehicle models L200, 
-# Q3, CX-5, and XC90, the sport utility vehicle and pickup body types, using either petrol 
-# or diesel fuel types, and the six most frequently advertised colors of these vehicles: what 
-# are the most influential attributes when predicting the vehicles' advertised price?
+#look at non-null count
+#carAd.info()
 
-#Genmodel, Color, Bodytype, Fuel_type, Seat_num, Door_num, Price
+#drop the Seat_num, Door_num null values
+carAd.dropna(inplace=True)
 
+#convert price to an integer
+carAd['Price'] = pd.to_numeric(carAd['Price'], errors='coerce', downcast='integer')
 
-#initial data analysis of each feature
-#for columns in df.columns: 
+#did it work?
+#carAd.info()
+
+#last check for anything odd
+#print(carAd.loc[carAd['Price'].idxmax()])
+
+#initial data analysis of each feature, print a histogram
+#for columns in carAd.columns: 
 #   plt.figure(figsize=(4,3))
-#   sns.histplot(data=df,x=columns
+#   sns.histplot(data=carAd,x=columns
 #                , bins= 10)
 #   plt.title(columns)
 #   plt.show()
