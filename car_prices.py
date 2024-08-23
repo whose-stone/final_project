@@ -77,22 +77,32 @@ carAd['Price'] = pd.to_numeric(carAd['Price'], errors='coerce', downcast='intege
 #   plt.show()
 
 #Extract categorical columns from the dataframe
-categorical_columns = carAd.select_dtypes(include=['object']).columns.tolist()
-print(categorical_columns)
+categorical_columns = carAd.select_dtypes(include=np.object_).columns.tolist()
+#print(categorical_columns)
+
 #Initialize OneHotEncoder
-encoder = OneHotEncoder(sparse_output=False)
+encoder = OneHotEncoder()
 
 #Apply one-hot encoding to the categorical columns
-one_hot_encoded = encoder.fit_transform(carAd[categorical_columns])
+#one_hot_encoded = encoder.fit_transform(carAd[categorical_columns])
 
-#Create a DataFrame with the one-hot encoded columns
-one_hot_carAd = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out(categorical_columns))
+#transform the selected columns
+cTrans = make_column_transformer((encoder, categorical_columns), remainder= 'passthrough')
 
-# Concatenate the one-hot encoded dataframe with the original dataframe
-carAd_encoded = pd.concat([carAd, one_hot_carAd], axis=1)
+etr = ExtraTreesRegressor(random_state=75, max_features= None, verbose=2)
 
-# Drop the original categorical columns
-carAd_encoded = carAd_encoded.drop(categorical_columns, axis=1)
+carAd_transform = carAd.drop('Price', axis=1)
 
-# Display the resulting dataframe
-print(carAd_encoded)
+cTrans.fit(carAd)
+
+pipe = Pipeline(steps= [('ctrf', cTrans), ('model', etr)])
+
+x,testX,y,testY = train_test_split(carAd_transform, carAd['Price'], test_size = .3, stratify = carAd['Color'], random_state = 0)
+
+#print(x)
+#print(testX)
+#print(y)
+#print(testY)
+
+pipe.fit(x, y)
+print("R\N{SUPERSCRIPT TWO} =", pipe.score(x,y))
