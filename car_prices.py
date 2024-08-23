@@ -76,8 +76,23 @@ carAd['Price'] = pd.to_numeric(carAd['Price'], errors='coerce', downcast='intege
 #   plt.title(columns)
 #   plt.show()
 
+#Extract categorical columns from the dataframe
+categorical_columns = carAd.select_dtypes(include=['object']).columns.tolist()
+print(categorical_columns)
+#Initialize OneHotEncoder
+encoder = OneHotEncoder(sparse_output=False)
 
+#Apply one-hot encoding to the categorical columns
+one_hot_encoded = encoder.fit_transform(carAd[categorical_columns])
 
+#Create a DataFrame with the one-hot encoded columns
+one_hot_carAd = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out(categorical_columns))
 
+# Concatenate the one-hot encoded dataframe with the original dataframe
+carAd_encoded = pd.concat([carAd, one_hot_carAd], axis=1)
 
+# Drop the original categorical columns
+carAd_encoded = carAd_encoded.drop(categorical_columns, axis=1)
 
+# Display the resulting dataframe
+print(carAd_encoded)
