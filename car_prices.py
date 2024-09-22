@@ -2,7 +2,7 @@
 # Data Science Final Project
 # 21 August 2024
 
-#import pyreader as pyr
+#import pyreader as py
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -62,9 +62,6 @@ carAd.dropna(inplace=True)
 #convert price to an integer
 carAd['Price'] = pd.to_numeric(carAd['Price'], errors='coerce', downcast='integer')
 
-#did it work?
-#carAd.info()
-
 #last check for anything odd
 #print(carAd.loc[carAd['Price'].idxmax()])
 
@@ -77,32 +74,65 @@ carAd['Price'] = pd.to_numeric(carAd['Price'], errors='coerce', downcast='intege
 #   plt.show()
 
 #Extract categorical columns from the dataframe
-categorical_columns = carAd.select_dtypes(include=np.object_).columns.tolist()
+categorical_columns = carAd[['Bodytype','Color','Fuel_type','Genmodel']]
 #print(categorical_columns)
 
+encoded_columns = pd.get_dummies(categorical_columns, sparse= False, dtype='float')
+#print(encoded_columns)
+
+#join data sets
+
+first_all_data = carAd.join(encoded_columns, how='inner')
+clean_all_data = first_all_data.drop(columns = ['Bodytype', 'Color','Fuel_type','Genmodel'])
+
+#print(clean_all_data)
 #Initialize OneHotEncoder
-encoder = OneHotEncoder()
+#encoder = OneHotEncoder()
+#clean_all_data.to_csv('final_csv.csv')
 
 #Apply one-hot encoding to the categorical columns
 #one_hot_encoded = encoder.fit_transform(carAd[categorical_columns])
+#print(one_hot_encoded)
 
 #transform the selected columns
-cTrans = make_column_transformer((encoder, categorical_columns), remainder= 'passthrough')
+#cTrans = make_column_transformer((encoder, categorical_columns), remainder= 'passthrough')
 
-etr = ExtraTreesRegressor(random_state=75, max_features= None, verbose=2)
+#set the model params
+etr = ExtraTreesRegressor(random_state=17, max_features= None, verbose=2)
 
-carAd_transform = carAd.drop('Price', axis=1)
+#one hot encode the columns. Pass in the complete dataset
+#cTrans.fit(carAd_transform)
 
-cTrans.fit(carAd)
 
-pipe = Pipeline(steps= [('ctrf', cTrans), ('model', etr)])
 
-x,testX,y,testY = train_test_split(carAd_transform, carAd['Price'], test_size = .3, stratify = carAd['Color'], random_state = 0)
+#create the training and testing data
+x,testX,y,testY = train_test_split(clean_all_data, clean_all_data.iloc[:, 6], test_size = .1, stratify = None, random_state = 17)
 
-#print(x)
-#print(testX)
-#print(y)
-#print(testY)
+#create the pipeline that takes in the encoded data and applies the model
+#pipe = Pipeline(steps= [('ctrf', encoded_columns), ('model', etr)])
 
-pipe.fit(x, y)
-print("R\N{SUPERSCRIPT TWO} =", pipe.score(x,y))
+#train the model
+#pipe.fit(x, y)
+
+#Show the results
+#print("R\N{SUPERSCRIPT TWO} =", pipe.score(x,y))
+#R2 = 0.14278  FAIL
+
+
+#trPr = pipe.predict(x)
+#print("RMSE =",metrics.mean_squared_error(y,trPr,squared = False))
+#RMSE = 9058.74
+
+#evaluating testing performance
+#pred = pipe.predict(testX)
+#print("R\N{SUPERSCRIPT TWO} =",metrics.explained_variance_score(testY,pred))
+
+
+#Visualize Testing Performance
+#fig, ax = plt.subplots()
+#ax.scatter(pred, testY, edgecolors = (0,0,1))
+#ax.plot([testY.min(), testY.max()], [testY.min(), testY.max()],'r--', lw = 3)
+#ax.set_xlabel('Predicted Values')
+#ax.set_ylabel('Actual Values')
+#plt.show(block = True)
+
